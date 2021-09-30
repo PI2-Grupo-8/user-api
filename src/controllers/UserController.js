@@ -66,14 +66,6 @@ const signIn = (req, res) => {
   });
 }
 
-const loginRequired = (req, res, next) => {
-  if (req.user) {
-    next();
-  } else {
-    return res.status(401).json({ message: 'Unauthorized user!' });
-  }
-}
-
 const forgot_password = (req, res) => {
   async.waterfall([
     function (callback) {
@@ -186,7 +178,6 @@ module.exports = {
   register,
   signIn,
   updateUser,
-  loginRequired,
   forgot_password,
   reset_password
 }

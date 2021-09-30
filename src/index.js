@@ -2,7 +2,7 @@ const express = require('express');
 
 const routes = require('./routes');
 const { connectDB } = require('./db');
-const { JWTValidate } = require('./controllers/JWTController');
+const { JWTValidate } = require('./utils/JWTValidate');
 
 const { PORT, NODE_ENV } = process.env;
 

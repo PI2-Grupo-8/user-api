@@ -1,6 +1,7 @@
 const express = require('express');
 
-const UserController = require('./controllers/UserController')
+const UserController = require('./controllers/UserController');
+const { loginRequired } = require('./utils/JWTValidate');
 
 const routes = express.Router();
 
@@ -10,7 +11,7 @@ routes.post('/login', UserController.signIn);
 routes.post('/register', UserController.register);
 routes.post('/forgot_password', UserController.forgot_password);
 routes.post('/reset_password', UserController.reset_password);
-routes.put('/update', UserController.loginRequired, UserController.updateUser)
+routes.put('/update', loginRequired, UserController.updateUser)
 
 
 module.exports = routes;
