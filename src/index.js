@@ -1,5 +1,5 @@
 const express = require('express');
-
+const cors = require('cors');
 const routes = require('./routes');
 const { connectDB } = require('./db');
 const { JWTValidate } = require('./utils/JWTValidate');
@@ -16,7 +16,7 @@ connectDB()
 
 const app = express();
 app.use(express.json());
-
+app.use(cors());
 app.use(JWTValidate);
 app.use(routes);
 
