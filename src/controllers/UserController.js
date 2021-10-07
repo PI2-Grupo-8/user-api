@@ -34,8 +34,9 @@ const updateUser = async (req, res) => {
       ...updateObject
     }, { new: true });
     user.password = undefined;
-    return res.json(user)
+    return res.json({ ...user._doc })
   } catch (err) {
+    console.log(err);
     err = catchRepeatedValueError(err)
     return res.status(400).json({
       message: "Could not update user",
