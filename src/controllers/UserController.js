@@ -55,13 +55,20 @@ const signIn = (req, res) => {
   User.findOne({
     email: req.body.email
   }, function (err, user) {
-    if (err) throw err;
-    if (!user || !user.comparePassword(req.body.password)) {
-      return res.status(401).json({ message: 'Authentication failed. Invalid user or password.' });
+    try {
+      if (err) throw err;
+      if (!user || !user.comparePassword(req.body.password)) {
+        return res.status(401).json({ message: 'Authentication failed. Invalid user or password.' });
+      }
+      let response = { ...user._doc, token: jwt.sign({ email: user.email, name: user.name, _id: user._id }, 'RESTFULAPIs') };
+      response.password = undefined;
+      return res.json(response);
+    } catch (error) {
+      return res.status(400).json({
+        message: "Could not login",
+        error: error
+      });
     }
-    let response = { ...user._doc, token: jwt.sign({ email: user.email, name: user.name, _id: user._id }, 'RESTFULAPIs') };
-    response.password = undefined;
-    return res.json(response);
   });
 }
 
