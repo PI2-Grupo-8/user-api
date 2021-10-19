@@ -107,7 +107,7 @@ const forgot_password = (req, res) => {
         to: user.email,
         from: email,
         template: 'forgot-password-email',
-        subject: 'Password help has arrived!',
+        subject: 'Recuperação de senha StrongBerry!',
         context: {
           url: 'http://localhost:3000/auth/reset_password?token=' + token,
           name: user.name.split(' ')[0]
@@ -147,23 +147,23 @@ const reset_password = (req, res, next) => {
               message: err
             });
           } else {
-            var data = {
-              to: user.email,
-              from: email,
-              template: 'reset-password-email',
-              subject: 'Password Reset Confirmation',
-              context: {
-                name: user.name.split(' ')[0]
-              }
-            };
+            //var data = {
+            //  to: user.email,
+            //  from: email,
+            //  template: 'reset-password-email',
+            //  subject: 'Password Reset Confirmation',
+            //  context: {
+            //    name: user.name.split(' ')[0]
+            //  }
+            //};
 
-            smtpTransport.sendMail(data, function (err) {
-              if (!err) {
-                return res.json({ message: 'Password reset' });
-              } else {
-                return callback(err);
-              }
-            });
+            //smtpTransport.sendMail(data, function (err) {
+            //  if (!err) {
+            //    return res.json({ message: 'Password reset' });
+            //  } else {
+            //    return callback(err);
+            //  }
+            //});
           }
         });
       } else {
