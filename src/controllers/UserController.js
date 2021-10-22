@@ -1,6 +1,7 @@
 const User = require('../models/UserSchema'),
-  mongoose = require('mongoose'),
+  async = require('async'),
   jwt = require('jsonwebtoken'),
+  { smtpTransport, email } = require('../utils/SMTPConfig'),
   bcrypt = require('bcrypt'),
   { validateUserData, catchRepeatedValueError } = require('../utils/ValidateUser');
 
@@ -33,8 +34,9 @@ const updateUser = async (req, res) => {
       ...updateObject
     }, { new: true });
     user.password = undefined;
-    return res.json(user)
+    return res.json({ ...user._doc })
   } catch (err) {
+    console.log(err);
     err = catchRepeatedValueError(err)
     return res.status(400).json({
       message: "Could not update user",
@@ -72,17 +74,118 @@ const signIn = (req, res) => {
   });
 }
 
-const loginRequired = (req, res, next) => {
-  if (req.user) {
-    next();
-  } else {
-    return res.status(401).json({ message: 'Unauthorized user!' });
-  }
-}
+const forgot_password = (req, res) => {
+  async.waterfall([
+    function (callback) {
+      User.findOne({
+        email: req.body.email
+      }).exec(function (err, user) {
+        if (user) {
+          callback(err, user);
+        } else {
+          callback('User not found.');
+        }
+      });
+    },
+    function (user, callback) {
+      // create a unique token
+      var tokenObject = {
+        email: user.email,
+        id: user._id
+      };
+      var secret = user._id + '_' + user.email + '_' + new Date().getTime();
+      var token = jwt.sign(tokenObject, secret);
+      callback(null, user, token);
+    },
+    function (user, token, callback) {
+      User.findByIdAndUpdate({ _id: user._id }, { reset_password_token: token, reset_password_expires: Date.now() + 86400000 }, { new: true }).exec(function (err, new_user) {
+        callback(err, token, new_user);
+      });
+    },
+    function (token, user, callback) {
+      var data = {
+        to: user.email,
+        from: email,
+        template: 'forgot-password-email',
+        subject: 'Recuperação de senha StrongBerry!',
+        context: {
+          url: 'http://localhost:3000/auth/reset_password?token=' + token,
+          name: user.name.split(' ')[0]
+        }
+      };
+
+      smtpTransport.sendMail(data, function (err) {
+        if (!err) {
+          return res.json({ message: 'Kindly check your email for further instructions' });
+        } else {
+          return callback(err);
+        }
+      });
+    }
+  ], function (err) {
+    console.log(err);
+    return res.status(422).json({ message: err });
+  });
+};
+
+const reset_password = (req, res, next) => {
+  User.findOne({
+    reset_password_token: req.body.token,
+    reset_password_expires: {
+      $gt: Date.now()
+    }
+  }).exec(function (err, user) {
+    try {
+      if (!err && user) {
+        validateUserData(req.body.newPassword, true);
+        user.password = bcrypt.hashSync(req.body.newPassword, 10);
+        user.reset_password_token = undefined;
+        user.reset_password_expires = undefined;
+        user.save(function (err) {
+          if (err) {
+            return res.status(422).send({
+              message: err
+            });
+          } else {
+            //var data = {
+            //  to: user.email,
+            //  from: email,
+            //  template: 'reset-password-email',
+            //  subject: 'Password Reset Confirmation',
+            //  context: {
+            //    name: user.name.split(' ')[0]
+            //  }
+            //};
+
+            //smtpTransport.sendMail(data, function (err) {
+            //  if (!err) {
+            //    return res.json({ message: 'Password reset' });
+            //  } else {
+            //    return callback(err);
+            //  }
+            //});
+          }
+        });
+      } else {
+        return res.status(400).send({
+          message: 'Password reset token is invalid or has expired.'
+        });
+      }
+    } catch (err) {
+      err = catchRepeatedValueError(err)
+      return res.status(400).json({
+        message: "Could not update user",
+        error: err
+      });
+    }
+  });
+};
+
 
 module.exports = {
   register,
   signIn,
   updateUser,
-  loginRequired
+  forgot_password,
+  reset_password
 }

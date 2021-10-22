@@ -1,7 +1,7 @@
 const express = require('express');
 const routes = require('./routes');
 const cors = require('cors')
-const { JWTValidate } = require('./controllers/JWTController');
+const { JWTValidate } = require('./utils/JWTValidate');
 
 const app = express();
 app.use(express.json());
