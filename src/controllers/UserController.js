@@ -5,6 +5,8 @@ const User = require('../models/UserSchema'),
   bcrypt = require('bcrypt'),
   { validateUserData, catchRepeatedValueError } = require('../utils/ValidateUser');
 
+  const { SECRET } = process.env
+
 const register = async (req, res) => {
   try {
     validateUserData(req.body);
@@ -12,7 +14,7 @@ const register = async (req, res) => {
     newUser.password = bcrypt.hashSync(req.body.password, 10);
     newUser.save(function (err, user) {
       if (!err) {
-        let response = { ...user._doc, token: jwt.sign({ email: user.email, name: user.name, _id: user._id }, 'RESTFULAPIs') };
+        let response = { ...user._doc, token: jwt.sign({ email: user.email, name: user.name, _id: user._id }, SECRET) };
         response.password = undefined;
         return res.json(response);
       } else {
@@ -62,7 +64,7 @@ const signIn = (req, res) => {
       if (!user || !user.comparePassword(req.body.password)) {
         return res.status(401).json({ message: 'Authentication failed. Invalid user or password.' });
       }
-      let response = { ...user._doc, token: jwt.sign({ email: user.email, name: user.name, _id: user._id }, 'RESTFULAPIs') };
+      let response = { ...user._doc, token: jwt.sign({ email: user.email, name: user.name, _id: user._id }, SECRET) };
       response.password = undefined;
       return res.json(response);
     } catch (error) {
