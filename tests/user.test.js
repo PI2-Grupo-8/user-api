@@ -49,6 +49,26 @@ describe('User Tests', () => {
     expect(res.body.password).toBe(undefined);
   });
 
+  it('validation error on creating user', async () => {
+    const res = await request(app).post('/register').send({})
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe('Could not create user');
+  });
+
+  it('Recieves error on creating user', async () => {
+    const newUser = {
+      name: 'Example User123',
+      email: 'email',
+      password: '1'
+    }
+
+    const res = await request(app).post('/register').send(newUser)
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe('Could not create user');
+  });
+
   it('Recieves error on creating user', async () => {
     const res = await request(app).post('/register').send(user)
     expect(res.statusCode).toBe(400);
@@ -115,7 +135,7 @@ describe('User Tests', () => {
     expect(res.body.password).toBe(undefined);
   });
 
-  it('Failed login user', async () => {
+  it('Failed login user wrong password', async () => {
     const failedUser = {
       email: 'example@email.com',
       password: 'Senha Errada'
@@ -134,5 +154,14 @@ describe('User Tests', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toBe('Could not login');
+  });
+
+  it('forgot password no user', async () => {
+    const failedUser = {
+      email: 'example@email.com'
+    }
+    const res = await request(app).post('/forgot_password').send(failedUser)
+
+    expect(res.statusCode).toBe(422);
   });
 });
