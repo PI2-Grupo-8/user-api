@@ -7,15 +7,6 @@ const {
 
 let db;
 
-// jest.mock('nodemailer', () => ({
-//   createTransport: jest.fn().mockReturnValue({
-//     sendMail: jest.fn().mockReturnValue((mailoptions, callback) => { }),
-//     use: jest.fn().mockReturnValue((compile, options) => {})
-//   })
-// }));
-
-// jest.mock('nodemailer-express-handlebars', () => jest.fn().mockReturnValue((options => {})))
-
 beforeAll(async () => {
   db = await connectDB();
 });
@@ -165,13 +156,12 @@ describe('User Tests', () => {
     expect(res.body.message).toBe('Could not login');
   });
 
-  // it('request to reset password', async () => {
-  //   const noPassUser = {
-  //     email: 'example@email.com',
-  //   }
-  //   const res = await request(app).post('/forgot_password').send(noPassUser)
+  it('forgot password no user', async () => {
+    const failedUser = {
+      email: 'example@email.com'
+    }
+    const res = await request(app).post('/forgot_password').send(failedUser)
 
-  //   expect(res.statusCode).toBe(200);
-  //   expect(res.body.message).toBe('Could not login');
-  // });
+    expect(res.statusCode).toBe(422);
+  });
 });
