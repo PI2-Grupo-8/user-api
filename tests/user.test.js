@@ -15,6 +15,13 @@ afterEach(async () => {
   await eraseDB(db);
 });
 
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn().mockReturnValue({
+    sendMail: function(mailoptions, callback){ return callback(null) },
+    use: jest.fn().mockReturnValue((compile, hbs) => { })
+  }),
+}));
+
 describe('User Tests', () => {
   let userID;
   let createdUser;
