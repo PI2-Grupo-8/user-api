@@ -125,7 +125,6 @@ const forgot_password = (req, res) => {
       });
     }
   ], function (err) {
-    console.log(err);
     return res.status(422).json({ message: err });
   });
 };
@@ -149,23 +148,9 @@ const reset_password = (req, res, next) => {
               message: err
             });
           } else {
-            //var data = {
-            //  to: user.email,
-            //  from: email,
-            //  template: 'reset-password-email',
-            //  subject: 'Password Reset Confirmation',
-            //  context: {
-            //    name: user.name.split(' ')[0]
-            //  }
-            //};
-
-            //smtpTransport.sendMail(data, function (err) {
-            //  if (!err) {
-            //    return res.json({ message: 'Password reset' });
-            //  } else {
-            //    return callback(err);
-            //  }
-            //});
+            return res.status(200).send({
+              message: 'Password updated'
+            });
           }
         });
       } else {

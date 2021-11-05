@@ -156,9 +156,18 @@ describe('User Tests', () => {
     expect(res.body.message).toBe('Could not login');
   });
 
-  it('forgot password no user', async () => {
-    const failedUser = {
+  it('forgot password', async () => {
+    const userWithoutPass = {
       email: 'example@email.com'
+    }
+    const res = await request(app).post('/forgot_password').send(userWithoutPass)
+
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('forgot password user not found', async () => {
+    const failedUser = {
+      email: 'notfound@email.com'
     }
     const res = await request(app).post('/forgot_password').send(failedUser)
 
